@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spot the Cricket Ball – Club Fundraiser</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      background: #f5f7fa;
+      color: #222;
+    }
+    header {
+      background: #0b5c2b;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    header p {
+      margin: 5px 0 0;
+      font-size: 0.95rem;
+    }
+    main {
+      max-width: 960px;
+      margin: 20px auto;
+      padding: 0 15px 40px;
+    }
+    .hero {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    .hero h2 {
+      margin-top: 0;
+      color: #0b5c2b;
+    }
+    .layout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .image-panel, .form-panel {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      flex: 1 1 280px;
+      min-width: 280px;
+    }
+    .image-wrapper {
+      position: relative;
+      max-width: 100%;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid #ddd;
+      cursor: crosshair;
+    }
+    .image-wrapper img {
+      display: block;
+      width: 100%;
+      height: auto;
+      user-select: none;
+    }
+    .marker {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 3px solid #ff3b3b;
+      background: rgba(255, 59, 59, 0.2);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    .coords {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    form label {
+      display: block;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    form input, form select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 4px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 0.95rem;
+      box-sizing: border-box;
+    }
+    form button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 10px;
+      border-radius: 4px;
+      border: none;
+      background: #0b5c2b;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    form button:hover {
+      background: #0e7035;
+    }
+    .note {
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 8px;
+    }
+    .footer {
+      margin-top: 25px;
+      font-size: 0.85rem;
+      color: #666;
+      line-height: 1.4;
+    }
+    .footer h3 {
+      margin-top: 0;
+      color: #0b5c2b;
+    }
+    @media (max-width: 640px) {
+      header h1 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Spot the Cricket Ball – Fundraiser</h1>
+  <p>Support your club and win a prize by guessing where the ball is!</p>
+</header>
+
+<main>
+  <section class="hero">
+    <h2>Win £500 & Support the Club</h2>
+    <p>
+      Study the photo, click where you think the cricket ball should be, and submit your entry.
+      The closest guess to the true position wins the prize. All proceeds go towards supporting
+      our cricket club facilities, junior coaching, and equipment.
+    </p>
+  </section>
+
+  <section class="layout">
+    <div class="image-panel">
+      <h3>Step 1 – Click to place your marker</h3>
+      <p>Tap or click on the image below where you think the ball is.</p>
+
+      <div class="image-wrapper" id="imageWrapper">
+        <!-- Replace the src with your real cricket photo (without the ball) -->
+        <img id="gameImage" src="https://via.placeholder.com/800x500?text=Cricket+Image+Here" alt="Cricket spot the ball">
+        <div id="marker" class="marker" style="display:none;"></div>
+      </div>
+
+      <div class="coords" id="coordsDisplay">
+        No guess yet – click on the image to place your marker.
+      </div>
+    </div>
+
+    <div class="form-panel">
+      <h3>Step 2 – Enter your details</h3>
+      <form id="entryForm">
+        <label for="name">Full name</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="tickets">Number of entries</label>
+        <select id="tickets" name="tickets">
+          <option value="1">1 entry (£2)</option>
+          <option value="2">2 entries (£4)</option>
+          <option value="5">5 entries (£10)</option>
+        </select>
+
+        <!-- Hidden fields to store coordinates -->
+        <input type="hidden" id="coordX" name="coordX">
+        <input type="hidden" id="coordY" name="coordY">
+
+        <button type="submit">Submit Entry</button>
+        <p class="note">
+          Payment integration (Stripe/Cashflows/etc.) can be added here. For now, this form just
+          demonstrates the entry flow.
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <section class="footer">
+    <h3>How the winner is chosen</h3>
+    <p>
+      After the competition closes, the club committee will reveal the true position of the ball.
+      Every entry’s marker coordinates are compared to the true position, and the shortest distance
+      wins. In case of a tie, the earliest correct entry wins.
+    </p>
+    <p>
+      By entering, you agree to our competition rules and privacy notice. Entrants must be 18+.
+    </p>
+  </section>
+</main>
+
+<script>
+  const imageWrapper = document.getElementById('imageWrapper');
+  const gameImage = document.getElementById('gameImage');
+  const marker = document.getElementById('marker');
+  const coordXInput = document.getElementById('coordX');
+  const coordYInput = document.getElementById('coordY');
+  const coordsDisplay = document.getElementById('coordsDisplay');
+  const entryForm = document.getElementById('entryForm');
+
+  function placeMarker(event) {
+    const rect = gameImage.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
+
+    const relativeX = (clickX / rect.width) * 100;
+    const relativeY = (clickY / rect.height) * 100;
+
+    marker.style.left = relativeX + '%';
+    marker.style.top = relativeY + '%';
+    marker.style.display = 'block';
+
+    coordXInput.value = relativeX.toFixed(2);
+    coordYInput.value = relativeY.toFixed(2);
+
+    coordsDisplay.textContent =
+      `Your guess: X = ${relativeX.toFixed(2)}%, Y = ${relativeY.toFixed(2)}%`;
+  }
+
+  imageWrapper.addEventListener('click', placeMarker);
+
+  entryForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    if (!coordXInput.value || !coordYInput.value) {
+      alert('Please click on the image to place your marker before submitting.');
+      return;
+    }
+
+    const data = {
+      name: entryForm.name.value,
+      email: entryForm.email.value,
+      tickets: entryForm.tickets.value,
+      coordX: coordXInput.value,
+      coordY: coordYInput.value
+    };
+
+    console.log('Entry submitted:', data);
+
+    alert('Thank you! Your entry has been recorded (demo). In a live site, this would be sent to the server.');
+
+    entryForm.reset();
+    marker.style.display = 'none';
+    coordXInput.value = '';
+    coordYInput.value = '';
+    coordsDisplay.textContent = 'No guess yet – click on the image to place your marker.';
+  });
+</script>
+</body>
+</html>
+  
