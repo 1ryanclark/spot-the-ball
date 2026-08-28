@@ -166,6 +166,38 @@
       display: inline-block;
     }
 
+    .info-banner {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border-left: 3px solid var(--gold);
+      padding-left: 10px;
+    }
+
+    .info-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .info-value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
     .layout {
       display: grid;
       grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr);
@@ -219,6 +251,86 @@
       pointer-events: none;
       box-shadow: 0 0 0 3px rgba(255, 59, 59, 0.25);
       display: none;
+    }
+
+    .package-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .package-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 12px 10px;
+      border-radius: 8px;
+      border: 2px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color 0.12s ease, background 0.12s ease;
+    }
+
+    .package-option:hover {
+      border-color: var(--gold);
+    }
+
+    .package-option.selected {
+      border-color: var(--green);
+      background: #eefaf0;
+    }
+
+    .package-title {
+      font-weight: 700;
+      color: var(--navy);
+      font-size: 0.95rem;
+    }
+
+    .package-price {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    .package-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .guess-marker {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 3px solid #ff3b3b;
+      background: rgba(255, 59, 59, 0.35);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      box-shadow: 0 0 0 3px rgba(255, 59, 59, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .reset-btn {
+      margin-top: 10px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid #ccc;
+      background: #fff;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .reset-btn:hover {
+      border-color: var(--navy);
+      color: var(--navy);
     }
 
     .coords {
@@ -408,8 +520,9 @@
       <h2>Spot the Ball – Help Build Four Lanes</h2>
       <p>
         Study the image, place your marker where you think the ball should be, and submit your entry.
-        Every entry supports our Four Lanes for Letchworth campaign, helping us create four new lanes
-        for the future of cricket in our community.
+        This competition is raising funds for our <strong>Under 9s</strong>, as part of the wider
+        Four Lanes for Letchworth campaign to create four new lanes for the future of cricket in our
+        community.
       </p>
       <div class="hero-buttons">
         <a href="#game" class="btn btn-primary">Play Spot the Ball</a>
@@ -420,31 +533,69 @@
     </div>
   </section>
 
+  <section class="info-banner">
+    <div class="info-item">
+      <span class="info-label">Entries close</span>
+      <span class="info-value">24th September 2026</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Winner announced</span>
+      <span class="info-value">Awards Evening, 25th September 2026</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">In aid of</span>
+      <span class="info-value">Letchworth CC Under 9s</span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Prize fund so far (10% of entries)</span>
+      <span class="info-value" id="prizeFundDisplay">Loading…</span>
+    </div>
+  </section>
+
   <section id="game" class="layout">
     <div class="card">
-      <h3>Step 1 – Place your marker</h3>
+      <h3>Step 1 – Choose your entry</h3>
       <p>
-        Tap or click on the image below where you think the cricket ball should be. Your marker will
-        appear and your guess will be recorded as a percentage position on the image.
+        Pick how many spots you'd like to guess. Each spot is a separate guess at where the ball is.
+      </p>
+
+      <div class="package-selector">
+        <button type="button" class="package-option" data-package="single">
+          <span class="package-title">1 Spot</span>
+          <span class="package-price">£2</span>
+        </button>
+        <button type="button" class="package-option" data-package="triple">
+          <span class="package-title">3 Spots</span>
+          <span class="package-price">£5</span>
+          <span class="package-sub">Best value</span>
+        </button>
+      </div>
+
+      <h3 id="stepTwoHeading">Step 2 – Place your marker</h3>
+      <p id="placeMarkerHelp">
+        Choose a package above, then tap or click on the image where you think the cricket ball
+        should be. Your guess is recorded as a percentage position on the image.
       </p>
 
       <div class="image-wrapper" id="imageWrapper">
         <img id="gameImage"
              src="cricket-no-ball.jpg"
              alt="Cricket Spot the Ball">
-        <div class="marker" id="marker"></div>
       </div>
 
+      <button type="button" class="reset-btn" id="resetBtn">Reset markers</button>
+
       <div class="coords" id="coordsDisplay">
-        <strong>No guess yet</strong> – click on the image to place your marker.
+        <strong>No package selected yet</strong> – choose a package above to begin.
       </div>
     </div>
 
     <div class="card">
-      <h3>Step 2 – Enter your details & pay</h3>
+      <h3>Step 3 – Enter your details & pay</h3>
       <p>
         Fill in your details, then pay the entry fee via PayPal below. Your entry is only recorded
-        once payment is confirmed.
+        once payment is confirmed. Entries close 24th September 2026 — the winner takes home 10% of
+        the total prize fund, announced at the club's Awards Evening on 25th September.
       </p>
 
       <form id="entryForm">
@@ -454,10 +605,6 @@
         <label for="email">Email address</label>
         <input type="email" id="email" name="email" required>
 
-        <!-- Hidden fields to store coordinates -->
-        <input type="hidden" id="coordX" name="coordX">
-        <input type="hidden" id="coordY" name="coordY">
-
         <button type="submit" id="continueBtn">Continue to Payment</button>
         <p class="note">
           Entries are only counted once your PayPal payment has gone through. The entry (with your
@@ -466,8 +613,8 @@
       </form>
 
       <div class="payment-section" id="paymentSection">
-        <h4>Step 3 – Pay your entry fee</h4>
-        <p>Entry fee: <strong id="entryFeeDisplay">£5.00</strong></p>
+        <h4>Step 4 – Pay your entry fee</h4>
+        <p>Entry fee: <strong id="entryFeeDisplay">£0.00</strong></p>
         <div id="paypal-button-container"></div>
       </div>
 
@@ -475,8 +622,11 @@
 
       <div class="footer">
         <p>
-          After the competition closes, the club will reveal the true ball position and select the
-          winner based on the closest guess. In the event of a tie, the earliest correct entry wins.
+          Entries close 24th September 2026. After the competition closes, the club will reveal the
+          true ball position and select the winner based on the closest guess. In the event of a tie,
+          the earliest correct entry wins. The winner receives 10% of the total prize fund, announced
+          at the club's Awards Evening on 25th September 2026. All proceeds support the Letchworth CC
+          Under 9s, as part of the Four Lanes for Letchworth campaign.
         </p>
         <p>
           Learn more about the campaign at
@@ -491,59 +641,140 @@
 
 <script>
   // ============================================================
-  // CONFIG — edit these two values.
+  // CONFIG — edit these.
   // ============================================================
 
   // 1. Paste your deployed Google Apps Script Web App URL here.
   //    (See google-apps-script-code.gs for how to get this.)
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzFXWCTXmIriFhcnus3xQHkBeZmy5sy9KmqWgiodYI1wWho-T_AR-n4bCX0sz6k76MOLg/exec';
 
-  // 2. Set your entry fee (must match the number shown to the user).
-  const ENTRY_FEE_AMOUNT = '5.00';
+  // 2. Pricing packages. Change the price or spot count here if it ever changes.
+  const PACKAGES = {
+    single: { key: 'single', label: '1 Spot', count: 1, price: '2.00' },
+    triple: { key: 'triple', label: '3 Spots', count: 3, price: '5.00' }
+  };
 
   // ============================================================
 
   const imageWrapper = document.getElementById('imageWrapper');
   const gameImage = document.getElementById('gameImage');
-  const marker = document.getElementById('marker');
-  const coordXInput = document.getElementById('coordX');
-  const coordYInput = document.getElementById('coordY');
   const coordsDisplay = document.getElementById('coordsDisplay');
+  const placeMarkerHelp = document.getElementById('placeMarkerHelp');
+  const stepTwoHeading = document.getElementById('stepTwoHeading');
+  const resetBtn = document.getElementById('resetBtn');
+  const packageButtons = document.querySelectorAll('.package-option');
   const entryForm = document.getElementById('entryForm');
   const continueBtn = document.getElementById('continueBtn');
   const paymentSection = document.getElementById('paymentSection');
   const entryFeeDisplay = document.getElementById('entryFeeDisplay');
   const resultContainer = document.getElementById('resultContainer');
+  const prizeFundDisplay = document.getElementById('prizeFundDisplay');
 
-  entryFeeDisplay.textContent = '£' + ENTRY_FEE_AMOUNT;
+  let selectedPackage = null;
+  let guesses = []; // array of { x, y } in percent
+
+  function loadPrizeFund() {
+    fetch(APPS_SCRIPT_URL)
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        prizeFundDisplay.textContent = '£' + data.prizeFund + ' (' + data.entryCount + ' entries)';
+      })
+      .catch(function (err) {
+        console.error('Could not load prize fund total:', err);
+        prizeFundDisplay.textContent = 'Unavailable';
+      });
+  }
+
+  loadPrizeFund();
+
+  function selectPackage(pkgKey) {
+    selectedPackage = PACKAGES[pkgKey];
+    guesses = [];
+    clearMarkers();
+
+    packageButtons.forEach(function (btn) {
+      btn.classList.toggle('selected', btn.dataset.package === pkgKey);
+    });
+
+    stepTwoHeading.textContent = 'Step 2 – Place your marker' + (selectedPackage.count > 1 ? 's' : '');
+    placeMarkerHelp.textContent = 'Tap or click on the image where you think the ball should be. You have '
+      + selectedPackage.count + ' guess' + (selectedPackage.count > 1 ? 'es' : '') + ' to place.';
+
+    updateCoordsDisplay();
+  }
+
+  packageButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      selectPackage(btn.dataset.package);
+    });
+  });
+
+  function clearMarkers() {
+    imageWrapper.querySelectorAll('.guess-marker').forEach(function (el) { el.remove(); });
+  }
+
+  function updateCoordsDisplay() {
+    if (!selectedPackage) {
+      coordsDisplay.innerHTML = '<strong>No package selected yet</strong> – choose a package above to begin.';
+      return;
+    }
+    if (guesses.length === 0) {
+      coordsDisplay.innerHTML = `<strong>0 of ${selectedPackage.count} placed</strong> – click on the image to place a marker.`;
+      return;
+    }
+    const list = guesses.map(function (g, i) {
+      return `#${i + 1}: X = ${g.x.toFixed(2)}%, Y = ${g.y.toFixed(2)}%`;
+    }).join(' &nbsp;|&nbsp; ');
+    coordsDisplay.innerHTML = `<strong>${guesses.length} of ${selectedPackage.count} placed</strong> – ${list}`;
+  }
 
   function placeMarker(event) {
+    if (!selectedPackage) {
+      alert('Please choose a package (1 Spot or 3 Spots) before placing a marker.');
+      return;
+    }
+    if (guesses.length >= selectedPackage.count) {
+      alert(`You've used all ${selectedPackage.count} of your spots. Click "Reset markers" to change them.`);
+      return;
+    }
+
     const rect = gameImage.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
     const clickY = event.clientY - rect.top;
-
     const relativeX = (clickX / rect.width) * 100;
     const relativeY = (clickY / rect.height) * 100;
 
-    marker.style.left = relativeX + '%';
-    marker.style.top = relativeY + '%';
-    marker.style.display = 'block';
+    guesses.push({ x: relativeX, y: relativeY });
 
-    coordXInput.value = relativeX.toFixed(2);
-    coordYInput.value = relativeY.toFixed(2);
+    const markerEl = document.createElement('div');
+    markerEl.className = 'guess-marker';
+    markerEl.style.left = relativeX + '%';
+    markerEl.style.top = relativeY + '%';
+    markerEl.textContent = guesses.length;
+    imageWrapper.appendChild(markerEl);
 
-    coordsDisplay.innerHTML =
-      `<strong>Your guess:</strong> X = ${relativeX.toFixed(2)}%, Y = ${relativeY.toFixed(2)}%`;
+    updateCoordsDisplay();
   }
 
   imageWrapper.addEventListener('click', placeMarker);
 
-  // Step 2 -> Step 3: validate details + guess, then reveal PayPal button
+  resetBtn.addEventListener('click', function () {
+    guesses = [];
+    clearMarkers();
+    updateCoordsDisplay();
+  });
+
+  // Step 2 -> Step 3: validate package + guesses + details, then reveal PayPal button
   entryForm.addEventListener('submit', function (e) {
     e.preventDefault();
 
-    if (!coordXInput.value || !coordYInput.value) {
-      alert('Please click on the image to place your marker before continuing.');
+    if (!selectedPackage) {
+      alert('Please choose a package (1 Spot or 3 Spots) first.');
+      return;
+    }
+
+    if (guesses.length !== selectedPackage.count) {
+      alert(`Please place all ${selectedPackage.count} of your markers on the image before continuing.`);
       return;
     }
 
@@ -557,18 +788,26 @@
     entryForm.email.disabled = true;
     continueBtn.disabled = true;
     continueBtn.textContent = 'Details locked — pay below';
+    entryFeeDisplay.textContent = '£' + selectedPackage.price;
     paymentSection.classList.add('visible');
     paymentSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    renderPaypalButton();
   });
 
-  // PayPal Buy Now button
-  if (window.paypal) {
+  // PayPal Buy Now button — rendered once the package/price is locked in
+  let paypalButtonRendered = false;
+
+  function renderPaypalButton() {
+    if (paypalButtonRendered || !window.paypal) return;
+    paypalButtonRendered = true;
+
     paypal.Buttons({
       createOrder: function (data, actions) {
         return actions.order.create({
           purchase_units: [{
-            description: 'Spot the Ball entry fee — Four Lanes for Letchworth',
-            amount: { value: ENTRY_FEE_AMOUNT }
+            description: `Spot the Ball entry (${selectedPackage.label}) — Four Lanes for Letchworth`,
+            amount: { value: selectedPackage.price }
           }]
         });
       },
@@ -577,11 +816,11 @@
           const entryData = {
             name: entryForm.name.value,
             email: entryForm.email.value,
-            coordX: coordXInput.value,
-            coordY: coordYInput.value,
+            package: selectedPackage.label,
+            amount: selectedPackage.price,
+            guesses: guesses,
             paypalOrderId: data.orderID,
-            payerEmail: details.payer && details.payer.email_address ? details.payer.email_address : '',
-            amount: ENTRY_FEE_AMOUNT
+            payerEmail: details.payer && details.payer.email_address ? details.payer.email_address : ''
           };
 
           // Log the confirmed, paid entry to Google Sheets
@@ -594,6 +833,7 @@
           });
 
           showThankYou(entryData);
+          loadPrizeFund();
         });
       },
       onError: function (err) {
@@ -614,9 +854,10 @@
     resultBox.className = 'result-box';
     resultBox.innerHTML = `
       <h4>Thanks for entering, ${entryData.name}!</h4>
-      <p>Your payment of £${entryData.amount} was received and your entry has been recorded.</p>
+      <p>Your payment of £${entryData.amount} for ${entryData.package} was received and your entry has been recorded.</p>
       <p>PayPal reference: ${entryData.paypalOrderId}</p>
-      <p>Good luck!</p>
+      <p>The winner takes 10% of the total prize fund, announced at the Awards Evening on
+         25th September 2026. Good luck!</p>
     `;
 
     resultContainer.innerHTML = '';
