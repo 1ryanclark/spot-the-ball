@@ -268,10 +268,40 @@
       box-shadow: 0 3px 10px rgba(0,0,0,0.18);
     }
 
+    form button:disabled {
+      background: #9aa5a1;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
     .note {
       font-size: 0.8rem;
       color: var(--text-muted);
       margin-top: 8px;
+    }
+
+    .payment-section {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px dashed #ddd;
+      display: none;
+    }
+
+    .payment-section.visible {
+      display: block;
+    }
+
+    .payment-section h4 {
+      margin: 0 0 6px;
+      color: var(--navy);
+      font-size: 1rem;
+    }
+
+    .payment-section p {
+      margin: 0 0 10px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
     }
 
     .result-box {
@@ -294,24 +324,14 @@
       color: #2f4f3a;
     }
 
-    .gofundme-btn {
-      display: inline-block;
-      margin-top: 8px;
-      background: #02a95c;
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 999px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      text-decoration: none;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-      transition: background 0.12s ease, transform 0.08s ease, box-shadow 0.08s ease;
-    }
-
-    .gofundme-btn:hover {
-      background: #04c46a;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.22);
+    .error-box {
+      margin-top: 16px;
+      background: #fdecea;
+      border: 1px solid #f5c6c2;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 0.9rem;
+      color: #7a2e27;
     }
 
     .footer {
@@ -354,6 +374,17 @@
       }
     }
   </style>
+
+  <!--
+    ============================================================
+    PAYPAL SETUP — replace YOUR_PAYPAL_CLIENT_ID_HERE below.
+    Get a Client ID from https://developer.paypal.com/dashboard/applications
+    Use a "Sandbox" app ID first to test, then swap to your "Live" app ID
+    when you're ready to take real payments.
+    Change "currency=GBP" if needed.
+    ============================================================
+  -->
+  <script src="https://www.paypal.com/sdk/js?client-id=ARacmDod3vBikXSqcLOraZfjWq_73dd4j-XXEbljzC9-naHhgQlyjRqyem_McdwoyMobz7PoTQCD4koL&currency=GBP"></script>
 </head>
 <body>
 <header>
@@ -377,15 +408,11 @@
       <h2>Spot the Ball – Help Build Four Lanes</h2>
       <p>
         Study the image, place your marker where you think the ball should be, and submit your entry.
-        Every guess supports our Four Lanes for Letchworth campaign, helping us create four new lanes
+        Every entry supports our Four Lanes for Letchworth campaign, helping us create four new lanes
         for the future of cricket in our community.
       </p>
       <div class="hero-buttons">
         <a href="#game" class="btn btn-primary">Play Spot the Ball</a>
-        <a href="https://gofundme.com/f/four-lanes-for-letchworth/cl/d?attribution_id=sl:27809482-0282-433a-8864-863798d2ceaa&lang=en_GB&ts=1781869858&utm_campaign=pd_ss_icons&utm_content=amp20_t1&utm_medium=customer&utm_source=copy_link"
-           target="_blank" class="btn btn-secondary">
-          Donate on GoFundMe
-        </a>
       </div>
     </div>
     <div class="hero-logo">
@@ -414,10 +441,10 @@
     </div>
 
     <div class="card">
-      <h3>Step 2 – Enter your details</h3>
+      <h3>Step 2 – Enter your details & pay</h3>
       <p>
-        Submit your guess below. After entering, you’ll see a link to our GoFundMe page where you can
-        support the Four Lanes for Letchworth fundraising campaign.
+        Fill in your details, then pay the entry fee via PayPal below. Your entry is only recorded
+        once payment is confirmed.
       </p>
 
       <form id="entryForm">
@@ -431,12 +458,18 @@
         <input type="hidden" id="coordX" name="coordX">
         <input type="hidden" id="coordY" name="coordY">
 
-        <button type="submit">Submit Your Entry</button>
+        <button type="submit" id="continueBtn">Continue to Payment</button>
         <p class="note">
-          This demo records your entry in the browser only. For live competitions, entries can be
-          connected to a Google Sheet or email inbox.
+          Entries are only counted once your PayPal payment has gone through. The entry (with your
+          coordinates and PayPal confirmation) is then logged automatically.
         </p>
       </form>
+
+      <div class="payment-section" id="paymentSection">
+        <h4>Step 3 – Pay your entry fee</h4>
+        <p>Entry fee: <strong id="entryFeeDisplay">£5.00</strong></p>
+        <div id="paypal-button-container"></div>
+      </div>
 
       <div id="resultContainer"></div>
 
@@ -457,6 +490,19 @@
 </main>
 
 <script>
+  // ============================================================
+  // CONFIG — edit these two values.
+  // ============================================================
+
+  // 1. Paste your deployed Google Apps Script Web App URL here.
+  //    (See google-apps-script-code.gs for how to get this.)
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzFXWCTXmIriFhcnus3xQHkBeZmy5sy9KmqWgiodYI1wWho-T_AR-n4bCX0sz6k76MOLg/exec';
+
+  // 2. Set your entry fee (must match the number shown to the user).
+  const ENTRY_FEE_AMOUNT = '5.00';
+
+  // ============================================================
+
   const imageWrapper = document.getElementById('imageWrapper');
   const gameImage = document.getElementById('gameImage');
   const marker = document.getElementById('marker');
@@ -464,7 +510,12 @@
   const coordYInput = document.getElementById('coordY');
   const coordsDisplay = document.getElementById('coordsDisplay');
   const entryForm = document.getElementById('entryForm');
+  const continueBtn = document.getElementById('continueBtn');
+  const paymentSection = document.getElementById('paymentSection');
+  const entryFeeDisplay = document.getElementById('entryFeeDisplay');
   const resultContainer = document.getElementById('resultContainer');
+
+  entryFeeDisplay.textContent = '£' + ENTRY_FEE_AMOUNT;
 
   function placeMarker(event) {
     const rect = gameImage.getBoundingClientRect();
@@ -487,49 +538,90 @@
 
   imageWrapper.addEventListener('click', placeMarker);
 
+  // Step 2 -> Step 3: validate details + guess, then reveal PayPal button
   entryForm.addEventListener('submit', function (e) {
     e.preventDefault();
 
     if (!coordXInput.value || !coordYInput.value) {
-      alert('Please click on the image to place your marker before submitting.');
+      alert('Please click on the image to place your marker before continuing.');
       return;
     }
 
-    const data = {
-      name: entryForm.name.value,
-      email: entryForm.email.value,
-      coordX: coordXInput.value,
-      coordY: coordYInput.value
-    };
+    if (!entryForm.name.value || !entryForm.email.value) {
+      alert('Please fill in your name and email.');
+      return;
+    }
 
-    console.log('Entry submitted (demo only):', data);
+    // Lock in the details and reveal payment
+    entryForm.name.disabled = true;
+    entryForm.email.disabled = true;
+    continueBtn.disabled = true;
+    continueBtn.textContent = 'Details locked — pay below';
+    paymentSection.classList.add('visible');
+    paymentSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  // PayPal Buy Now button
+  if (window.paypal) {
+    paypal.Buttons({
+      createOrder: function (data, actions) {
+        return actions.order.create({
+          purchase_units: [{
+            description: 'Spot the Ball entry fee — Four Lanes for Letchworth',
+            amount: { value: ENTRY_FEE_AMOUNT }
+          }]
+        });
+      },
+      onApprove: function (data, actions) {
+        return actions.order.capture().then(function (details) {
+          const entryData = {
+            name: entryForm.name.value,
+            email: entryForm.email.value,
+            coordX: coordXInput.value,
+            coordY: coordYInput.value,
+            paypalOrderId: data.orderID,
+            payerEmail: details.payer && details.payer.email_address ? details.payer.email_address : '',
+            amount: ENTRY_FEE_AMOUNT
+          };
+
+          // Log the confirmed, paid entry to Google Sheets
+          fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(entryData)
+          }).catch(function (err) {
+            console.error('Could not log entry to Google Sheets:', err);
+          });
+
+          showThankYou(entryData);
+        });
+      },
+      onError: function (err) {
+        console.error('PayPal error:', err);
+        resultContainer.innerHTML = `
+          <div class="error-box">
+            <strong>Payment could not be completed.</strong> Please try again, or contact the club if the problem continues.
+          </div>
+        `;
+      }
+    }).render('#paypal-button-container');
+  }
+
+  function showThankYou(entryData) {
+    paymentSection.style.display = 'none';
 
     const resultBox = document.createElement('div');
     resultBox.className = 'result-box';
     resultBox.innerHTML = `
-      <h4>Thanks for entering!</h4>
-      <p>Your guess has been recorded.</p>
-      <p>
-        If you'd like to support our Four Lanes for Letchworth campaign, please consider donating
-        via GoFundMe using the button below.
-      </p>
-      <a class="gofundme-btn"
-         href="https://gofundme.com/f/four-lanes-for-letchworth/cl/d?attribution_id=sl:27809482-0282-433a-8864-863798d2ceaa&lang=en_GB&ts=1781869858&utm_campaign=pd_ss_icons&utm_content=amp20_t1&utm_medium=customer&utm_source=copy_link"
-         target="_blank">
-        Donate on GoFundMe
-      </a>
+      <h4>Thanks for entering, ${entryData.name}!</h4>
+      <p>Your payment of £${entryData.amount} was received and your entry has been recorded.</p>
+      <p>PayPal reference: ${entryData.paypalOrderId}</p>
+      <p>Good luck!</p>
     `;
 
     resultContainer.innerHTML = '';
     resultContainer.appendChild(resultBox);
-
-    entryForm.reset();
-    marker.style.display = 'none';
-    coordXInput.value = '';
-    coordYInput.value = '';
-    coordsDisplay.innerHTML =
-      '<strong>No guess yet</strong> – click on the image to place your marker.';
-  });
+  }
 </script>
 </body>
 </html>
