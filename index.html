@@ -166,6 +166,38 @@
       display: inline-block;
     }
 
+    .site-footer {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 10px 16px 40px;
+      text-align: center;
+    }
+
+    .site-footer p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin: 0 0 12px;
+    }
+
+    .gofundme-btn {
+      display: inline-block;
+      background: #02a95c;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      transition: background 0.12s ease, transform 0.08s ease, box-shadow 0.08s ease;
+    }
+
+    .gofundme-btn:hover {
+      background: #04c46a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.22);
+    }
+
     .info-banner {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -416,6 +448,56 @@
       color: var(--text-muted);
     }
 
+    .bank-details {
+      background: #f5f7fa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .bank-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 6px 0;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #e6e6e6;
+    }
+
+    .bank-row:last-child {
+      border-bottom: none;
+    }
+
+    .bank-row span {
+      color: var(--text-muted);
+    }
+
+    .bank-row strong {
+      color: var(--navy);
+    }
+
+    #confirmPaymentBtn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 999px;
+      border: none;
+      background: var(--green);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    #confirmPaymentBtn:hover {
+      background: #0e7035;
+    }
+
+    #confirmPaymentBtn:disabled {
+      background: #9aa5a1;
+      cursor: not-allowed;
+    }
+
     .result-box {
       margin-top: 16px;
       background: #e8f5e9;
@@ -486,17 +568,6 @@
       }
     }
   </style>
-
-  <!--
-    ============================================================
-    PAYPAL SETUP — replace YOUR_PAYPAL_CLIENT_ID_HERE below.
-    Get a Client ID from https://developer.paypal.com/dashboard/applications
-    Use a "Sandbox" app ID first to test, then swap to your "Live" app ID
-    when you're ready to take real payments.
-    Change "currency=GBP" if needed.
-    ============================================================
-  -->
-  <script src="https://www.paypal.com/sdk/js?client-id=ARacmDod3vBikXSqcLOraZfjWq_73dd4j-XXEbljzC9-naHhgQlyjRqyem_McdwoyMobz7PoTQCD4koL&currency=GBP"></script>
 </head>
 <body>
 <header>
@@ -591,11 +662,11 @@
     </div>
 
     <div class="card">
-      <h3>Step 3 – Enter your details & pay</h3>
+      <h3>Step 3 – Enter your details</h3>
       <p>
-        Fill in your details, then pay the entry fee via PayPal below. Your entry is only recorded
-        once payment is confirmed. Entries close 24th September 2026 — the winner takes home 10% of
-        the total prize fund, announced at the club's Awards Evening on 25th September.
+        Fill in your details, then pay your entry fee by bank transfer below. Entries close
+        24th September 2026 — the winner takes home 10% of the total prize fund, announced at the
+        club's Awards Evening on 25th September.
       </p>
 
       <form id="entryForm">
@@ -605,17 +676,34 @@
         <label for="email">Email address</label>
         <input type="email" id="email" name="email" required>
 
-        <button type="submit" id="continueBtn">Continue to Payment</button>
+        <label for="childName">Child's name (for the U9s fundraising prize)</label>
+        <input type="text" id="childName" name="childName" required>
+
+        <button type="submit" id="continueBtn">Continue to Payment Details</button>
         <p class="note">
-          Entries are only counted once your PayPal payment has gone through. The entry (with your
-          coordinates and PayPal confirmation) is then logged automatically.
+          Your entry is recorded as soon as you confirm you've paid — please make sure you send the
+          transfer using the reference shown in the next step.
         </p>
       </form>
 
       <div class="payment-section" id="paymentSection">
-        <h4>Step 4 – Pay your entry fee</h4>
+        <h4>Step 4 – Pay by bank transfer</h4>
         <p>Entry fee: <strong id="entryFeeDisplay">£0.00</strong></p>
-        <div id="paypal-button-container"></div>
+
+        <div class="bank-details">
+          <div class="bank-row"><span>Account name</span><strong>Ryan Clark</strong></div>
+          <div class="bank-row"><span>Sort code</span><strong>20-25-97</strong></div>
+          <div class="bank-row"><span>Account number</span><strong>23158810</strong></div>
+          <div class="bank-row"><span>Payment reference</span><strong id="referenceDisplay">—</strong></div>
+        </div>
+
+        <p class="note">
+          Please use the exact reference above when you send your payment — this is how we match your
+          transfer to your entry. Your entry is recorded straight away; if we don't see a matching
+          transfer, we'll remove it.
+        </p>
+
+        <button type="button" id="confirmPaymentBtn">I've made this bank transfer</button>
       </div>
 
       <div id="resultContainer"></div>
@@ -638,6 +726,18 @@
     </div>
   </section>
 </main>
+
+<footer class="site-footer">
+  <p>
+    Prefer to donate directly rather than enter the competition? You can support the wider Four Lanes
+    for Letchworth campaign on GoFundMe.
+  </p>
+  <a class="gofundme-btn"
+     href="https://www.gofundme.com/f/four-lanes-for-letchworth?attribution_id=sl:27809482-0282-433a-8864-863798d2ceaa&lang=en_GB&ts=1781869858&utm_campaign=pd_ss_icons&utm_content=amp20_t1&utm_medium=customer&utm_source=copy_link"
+     target="_blank">
+    Donate on GoFundMe
+  </a>
+</footer>
 
 <script>
   // ============================================================
@@ -667,11 +767,14 @@
   const continueBtn = document.getElementById('continueBtn');
   const paymentSection = document.getElementById('paymentSection');
   const entryFeeDisplay = document.getElementById('entryFeeDisplay');
+  const referenceDisplay = document.getElementById('referenceDisplay');
+  const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
   const resultContainer = document.getElementById('resultContainer');
   const prizeFundDisplay = document.getElementById('prizeFundDisplay');
 
   let selectedPackage = null;
   let guesses = []; // array of { x, y } in percent
+  let currentReference = '';
 
   function loadPrizeFund() {
     fetch(APPS_SCRIPT_URL)
@@ -764,7 +867,21 @@
     updateCoordsDisplay();
   });
 
-  // Step 2 -> Step 3: validate package + guesses + details, then reveal PayPal button
+  // Generates a short, fairly unique reference so a bank transfer can be
+  // matched back to this entry (e.g. LCC-J0N3-4821).
+  function generateReference(name) {
+    const initials = (name || '')
+      .split(' ')
+      .filter(Boolean)
+      .map(function (part) { return part[0]; })
+      .join('')
+      .toUpperCase()
+      .slice(0, 3) || 'STB';
+    const randomPart = Math.floor(1000 + Math.random() * 9000);
+    return `LCC-${initials}${randomPart}`;
+  }
+
+  // Step 2 -> Step 3: validate package + guesses + details, then reveal bank details
   entryForm.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -778,84 +895,64 @@
       return;
     }
 
-    if (!entryForm.name.value || !entryForm.email.value) {
-      alert('Please fill in your name and email.');
+    if (!entryForm.name.value || !entryForm.email.value || !entryForm.childName.value) {
+      alert('Please fill in your name, email, and the child\'s name.');
       return;
     }
 
-    // Lock in the details and reveal payment
+    // Lock in the details and reveal bank transfer details
     entryForm.name.disabled = true;
     entryForm.email.disabled = true;
+    entryForm.childName.disabled = true;
     continueBtn.disabled = true;
-    continueBtn.textContent = 'Details locked — pay below';
+    continueBtn.textContent = 'Details locked — see payment details below';
     entryFeeDisplay.textContent = '£' + selectedPackage.price;
+
+    currentReference = generateReference(entryForm.name.value);
+    referenceDisplay.textContent = currentReference;
+
     paymentSection.classList.add('visible');
     paymentSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-    renderPaypalButton();
   });
 
-  // PayPal Buy Now button — rendered once the package/price is locked in
-  let paypalButtonRendered = false;
+  confirmPaymentBtn.addEventListener('click', function () {
+    confirmPaymentBtn.disabled = true;
+    confirmPaymentBtn.textContent = 'Recording entry…';
 
-  function renderPaypalButton() {
-    if (paypalButtonRendered || !window.paypal) return;
-    paypalButtonRendered = true;
+    const entryData = {
+      name: entryForm.name.value,
+      email: entryForm.email.value,
+      childName: entryForm.childName.value,
+      package: selectedPackage.label,
+      amount: selectedPackage.price,
+      guesses: guesses,
+      reference: currentReference
+    };
 
-    paypal.Buttons({
-      createOrder: function (data, actions) {
-        return actions.order.create({
-          purchase_units: [{
-            description: `Spot the Ball entry (${selectedPackage.label}) — Four Lanes for Letchworth`,
-            amount: { value: selectedPackage.price }
-          }]
-        });
-      },
-      onApprove: function (data, actions) {
-        return actions.order.capture().then(function (details) {
-          const entryData = {
-            name: entryForm.name.value,
-            email: entryForm.email.value,
-            package: selectedPackage.label,
-            amount: selectedPackage.price,
-            guesses: guesses,
-            paypalOrderId: data.orderID,
-            payerEmail: details.payer && details.payer.email_address ? details.payer.email_address : ''
-          };
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(entryData)
+    })
+      .catch(function (err) {
+        console.error('Could not log entry to Google Sheets:', err);
+      })
+      .finally(function () {
+        showConfirmation(entryData);
+        loadPrizeFund();
+      });
+  });
 
-          // Log the confirmed, paid entry to Google Sheets
-          fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(entryData)
-          }).catch(function (err) {
-            console.error('Could not log entry to Google Sheets:', err);
-          });
-
-          showThankYou(entryData);
-          loadPrizeFund();
-        });
-      },
-      onError: function (err) {
-        console.error('PayPal error:', err);
-        resultContainer.innerHTML = `
-          <div class="error-box">
-            <strong>Payment could not be completed.</strong> Please try again, or contact the club if the problem continues.
-          </div>
-        `;
-      }
-    }).render('#paypal-button-container');
-  }
-
-  function showThankYou(entryData) {
+  function showConfirmation(entryData) {
     paymentSection.style.display = 'none';
 
     const resultBox = document.createElement('div');
     resultBox.className = 'result-box';
     resultBox.innerHTML = `
-      <h4>Thanks for entering, ${entryData.name}!</h4>
-      <p>Your payment of £${entryData.amount} for ${entryData.package} was received and your entry has been recorded.</p>
-      <p>PayPal reference: ${entryData.paypalOrderId}</p>
+      <h4>Thanks, ${entryData.name} — your entry is recorded!</h4>
+      <p>Your ${entryData.package} entry (£${entryData.amount}) has been logged for <strong>${entryData.childName}</strong>
+         using reference <strong>${entryData.reference}</strong>. Please make sure you send the bank
+         transfer using that exact reference.</p>
       <p>The winner takes 10% of the total prize fund, announced at the Awards Evening on
          25th September 2026. Good luck!</p>
     `;
