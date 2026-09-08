@@ -676,13 +676,13 @@
         <label for="email">Email address</label>
         <input type="email" id="email" name="email" required>
 
-        <label for="childName">Child's name (for the U9s fundraising prize)</label>
-        <input type="text" id="childName" name="childName" required>
+        <label for="childName">Child's name (optional — for the U9s fundraising prize)</label>
+        <input type="text" id="childName" name="childName">
 
         <button type="submit" id="continueBtn">Continue to Payment Details</button>
         <p class="note">
-          Your entry is recorded as soon as you confirm you've paid — please make sure you send the
-          transfer using the reference shown in the next step.
+          Your entry is recorded the moment you press continue — please then make sure you actually
+          send the bank transfer using the reference shown in the next step.
         </p>
       </form>
 
@@ -699,8 +699,7 @@
 
         <p class="note">
           Please use the exact reference above when you send your payment — this is how we match your
-          transfer to your entry. Your entry is recorded straight away; if we don't see a matching
-          transfer, we'll remove it.
+          transfer to your entry. Once you've sent it, tap below to finish up.
         </p>
 
         <button type="button" id="confirmPaymentBtn">I've made this bank transfer</button>
@@ -881,7 +880,11 @@
     return `LCC-${initials}${randomPart}`;
   }
 
-  // Step 2 -> Step 3: validate package + guesses + details, then reveal bank details
+  // Step 2 -> Step 3: validate package + guesses + details, THEN record the entry
+  // straight away (before payment details are even shown) — this fixes people
+  // seeing bank details but never coming back to press the final button.
+  let currentEntryData = null;
+
   entryForm.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -895,8 +898,8 @@
       return;
     }
 
-    if (!entryForm.name.value || !entryForm.email.value || !entryForm.childName.value) {
-      alert('Please fill in your name, email, and the child\'s name.');
+    if (!entryForm.name.value || !entryForm.email.value) {
+      alert('Please fill in your name and email.');
       return;
     }
 
@@ -905,21 +908,13 @@
     entryForm.email.disabled = true;
     entryForm.childName.disabled = true;
     continueBtn.disabled = true;
-    continueBtn.textContent = 'Details locked — see payment details below';
+    continueBtn.textContent = 'Recording your entry…';
     entryFeeDisplay.textContent = '£' + selectedPackage.price;
 
     currentReference = generateReference(entryForm.name.value);
     referenceDisplay.textContent = currentReference;
 
-    paymentSection.classList.add('visible');
-    paymentSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  });
-
-  confirmPaymentBtn.addEventListener('click', function () {
-    confirmPaymentBtn.disabled = true;
-    confirmPaymentBtn.textContent = 'Recording entry…';
-
-    const entryData = {
+    currentEntryData = {
       name: entryForm.name.value,
       email: entryForm.email.value,
       childName: entryForm.childName.value,
@@ -929,28 +924,47 @@
       reference: currentReference
     };
 
+    // Record it now — this is the fix. Entries used to only get logged after
+    // the final "I've made this bank transfer" button, and people were
+    // skipping that step, so their payment came through but never got
+    // recorded. Now it's logged as soon as they continue.
     fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(entryData)
+      body: JSON.stringify(currentEntryData)
     })
       .catch(function (err) {
         console.error('Could not log entry to Google Sheets:', err);
       })
       .finally(function () {
-        showConfirmation(entryData);
         loadPrizeFund();
       });
+
+    continueBtn.textContent = 'Details locked — see payment details below';
+    paymentSection.classList.add('visible');
+    paymentSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  // This button no longer triggers the recording (that already happened) —
+  // it's just a friendly confirmation step once they've actually paid.
+  confirmPaymentBtn.addEventListener('click', function () {
+    confirmPaymentBtn.disabled = true;
+    confirmPaymentBtn.textContent = 'Thanks!';
+    showConfirmation(currentEntryData);
   });
 
   function showConfirmation(entryData) {
     paymentSection.style.display = 'none';
 
+    const childLine = entryData.childName
+      ? ` for <strong>${entryData.childName}</strong>`
+      : '';
+
     const resultBox = document.createElement('div');
     resultBox.className = 'result-box';
     resultBox.innerHTML = `
       <h4>Thanks, ${entryData.name} — your entry is recorded!</h4>
-      <p>Your ${entryData.package} entry (£${entryData.amount}) has been logged for <strong>${entryData.childName}</strong>
+      <p>Your ${entryData.package} entry (£${entryData.amount}) has been logged${childLine}
          using reference <strong>${entryData.reference}</strong>. Please make sure you send the bank
          transfer using that exact reference.</p>
       <p>The winner takes 10% of the total prize fund, announced at the Awards Evening on
