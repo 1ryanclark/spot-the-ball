@@ -198,6 +198,61 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.22);
     }
 
+    .deadline-banner {
+      margin-bottom: 16px;
+      background: var(--navy);
+      border: 3px solid var(--gold);
+      border-radius: 12px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+
+    .deadline-flash {
+      color: var(--gold);
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.01em;
+      animation: deadlinePulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes deadlinePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+
+    .countdown {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .cd-box {
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px 12px;
+      min-width: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .cd-num {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--navy);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cd-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-top: 2px;
+    }
+
     .info-banner {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -498,6 +553,29 @@
       cursor: not-allowed;
     }
 
+    #cashOnDayBtn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 999px;
+      border: 2px solid var(--navy);
+      background: var(--gold);
+      color: #1b1b1b;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    #cashOnDayBtn:hover {
+      background: #ffd86a;
+    }
+
+    #cashOnDayBtn:disabled {
+      background: #e8e0c0;
+      border-color: #b8b8b8;
+      color: #888;
+      cursor: not-allowed;
+    }
+
     .result-box {
       margin-top: 16px;
       background: #e8f5e9;
@@ -604,10 +682,20 @@
     </div>
   </section>
 
+  <section class="deadline-banner" id="deadlineBanner">
+    <div class="deadline-flash">⏰ DEADLINE EXTENDED! Entries now close 6:00pm, Friday 25th September ⏰</div>
+    <div class="countdown" id="countdown">
+      <div class="cd-box"><span class="cd-num" id="cdDays">–</span><span class="cd-label">Days</span></div>
+      <div class="cd-box"><span class="cd-num" id="cdHours">–</span><span class="cd-label">Hours</span></div>
+      <div class="cd-box"><span class="cd-num" id="cdMins">–</span><span class="cd-label">Mins</span></div>
+      <div class="cd-box"><span class="cd-num" id="cdSecs">–</span><span class="cd-label">Secs</span></div>
+    </div>
+  </section>
+
   <section class="info-banner">
     <div class="info-item">
       <span class="info-label">Entries close</span>
-      <span class="info-value">24th September 2026</span>
+      <span class="info-value">25th Sept, 6:00pm <em>(extended)</em></span>
     </div>
     <div class="info-item">
       <span class="info-label">Winner announced</span>
@@ -664,9 +752,9 @@
     <div class="card">
       <h3>Step 3 – Enter your details</h3>
       <p>
-        Fill in your details, then pay your entry fee by bank transfer below. Entries close
-        24th September 2026 — the winner takes home 10% of the total prize fund, announced at the
-        club's Awards Evening on 25th September.
+        Fill in your details, then pay your entry fee by bank transfer — or in cash on the day —
+        below. Entries close <strong>6:00pm, 25th September 2026</strong> (extended!) — the winner
+        takes home 10% of the total prize fund, announced at the club's Awards Evening that evening.
       </p>
 
       <form id="entryForm">
@@ -703,17 +791,25 @@
         </p>
 
         <button type="button" id="confirmPaymentBtn">I've made this bank transfer</button>
+
+        <p class="note" style="margin-top:14px;">
+          Prefer to pay in person instead? You can now pay <strong>cash on the day</strong> of the
+          Awards Evening — just tap below and bring the cash with you.
+        </p>
+
+        <button type="button" id="cashOnDayBtn">I'll pay cash on the day</button>
       </div>
 
       <div id="resultContainer"></div>
 
       <div class="footer">
         <p>
-          Entries close 24th September 2026. After the competition closes, the club will reveal the
-          true ball position and select the winner based on the closest guess. In the event of a tie,
-          the earliest correct entry wins. The winner receives 10% of the total prize fund, announced
-          at the club's Awards Evening on 25th September 2026. All proceeds support the Letchworth CC
-          Under 9s, as part of the Four Lanes for Letchworth campaign.
+          Entries close 6:00pm, 25th September 2026 (extended from the original date). After the
+          competition closes, the club will reveal the true ball position and select the winner based
+          on the closest guess. In the event of a tie, the earliest correct entry wins. The winner
+          receives 10% of the total prize fund, announced at the club's Awards Evening on 25th
+          September 2026. All proceeds support the Letchworth CC Under 9s, as part of the Four Lanes
+          for Letchworth campaign.
         </p>
         <p>
           Learn more about the campaign at
@@ -768,6 +864,7 @@
   const entryFeeDisplay = document.getElementById('entryFeeDisplay');
   const referenceDisplay = document.getElementById('referenceDisplay');
   const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+  const cashOnDayBtn = document.getElementById('cashOnDayBtn');
   const resultContainer = document.getElementById('resultContainer');
   const prizeFundDisplay = document.getElementById('prizeFundDisplay');
 
@@ -788,6 +885,33 @@
   }
 
   loadPrizeFund();
+
+  // Countdown to the extended entry deadline: 6:00pm, 25th September 2026 (UK time, BST/+01:00)
+  const ENTRY_DEADLINE = new Date('2026-09-25T18:00:00+01:00');
+
+  function updateCountdown() {
+    const now = new Date();
+    const diff = ENTRY_DEADLINE - now;
+
+    if (diff <= 0) {
+      document.getElementById('countdown').innerHTML = '<div class="cd-box" style="min-width:auto;"><span class="cd-num" style="font-size:1rem;">Entries have closed</span></div>';
+      clearInterval(countdownInterval);
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const mins = Math.floor((diff / (1000 * 60)) % 60);
+    const secs = Math.floor((diff / 1000) % 60);
+
+    document.getElementById('cdDays').textContent = days;
+    document.getElementById('cdHours').textContent = String(hours).padStart(2, '0');
+    document.getElementById('cdMins').textContent = String(mins).padStart(2, '0');
+    document.getElementById('cdSecs').textContent = String(secs).padStart(2, '0');
+  }
+
+  updateCountdown();
+  const countdownInterval = setInterval(updateCountdown, 1000);
 
   function selectPackage(pkgKey) {
     selectedPackage = PACKAGES[pkgKey];
@@ -945,28 +1069,59 @@
     paymentSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
 
-  // This button no longer triggers the recording (that already happened) —
-  // it's just a friendly confirmation step once they've actually paid.
+  // This button no longer triggers the initial recording (that already
+  // happened at Continue) — it just confirms bank transfer was the method
+  // used, which is already the default status ('PAID') on the row.
   confirmPaymentBtn.addEventListener('click', function () {
     confirmPaymentBtn.disabled = true;
+    cashOnDayBtn.disabled = true;
     confirmPaymentBtn.textContent = 'Thanks!';
-    showConfirmation(currentEntryData);
+    showConfirmation(currentEntryData, 'bank');
   });
 
-  function showConfirmation(entryData) {
+  // Cash on the day: the entry was already recorded (as 'PAID') at Continue,
+  // so here we send a small update telling the sheet to relabel that row's
+  // Status as 'CASH ON DAY' instead, using the reference to find the row.
+  cashOnDayBtn.addEventListener('click', function () {
+    confirmPaymentBtn.disabled = true;
+    cashOnDayBtn.disabled = true;
+    cashOnDayBtn.textContent = 'Recording…';
+
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'updateStatus',
+        reference: currentReference,
+        status: 'CASH ON DAY'
+      })
+    })
+      .catch(function (err) {
+        console.error('Could not update payment method in Google Sheets:', err);
+      })
+      .finally(function () {
+        cashOnDayBtn.textContent = 'Thanks!';
+        showConfirmation(currentEntryData, 'cash');
+      });
+  });
+
+  function showConfirmation(entryData, method) {
     paymentSection.style.display = 'none';
 
     const childLine = entryData.childName
       ? ` for <strong>${entryData.childName}</strong>`
       : '';
 
+    const paymentLine = method === 'cash'
+      ? `You've chosen to pay <strong>£${entryData.amount} cash on the day</strong> — please bring it
+         with you to the Awards Evening, quoting reference <strong>${entryData.reference}</strong>.`
+      : `Please make sure you send the bank transfer using reference <strong>${entryData.reference}</strong>.`;
+
     const resultBox = document.createElement('div');
     resultBox.className = 'result-box';
     resultBox.innerHTML = `
       <h4>Thanks, ${entryData.name} — your entry is recorded!</h4>
-      <p>Your ${entryData.package} entry (£${entryData.amount}) has been logged${childLine}
-         using reference <strong>${entryData.reference}</strong>. Please make sure you send the bank
-         transfer using that exact reference.</p>
+      <p>Your ${entryData.package} entry (£${entryData.amount}) has been logged${childLine}. ${paymentLine}</p>
       <p>The winner takes 10% of the total prize fund, announced at the Awards Evening on
          25th September 2026. Good luck!</p>
     `;
